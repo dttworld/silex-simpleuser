@@ -12,11 +12,8 @@ use Symfony\Component\Security\Core\Authorization\Voter\RoleHierarchyVoter;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\SecurityContextInterface;
 
-use Facebook\FacebookSession;
-
 class UserServiceProvider implements ServiceProviderInterface, ControllerProviderInterface
 {
-    FacebookSession::setDefaultApplication('1593677974224055', '4aa8892f1b99a81ca87bc93099b89fba');
     /**
      * Registers services on the given app.
      *
@@ -42,7 +39,7 @@ class UserServiceProvider implements ServiceProviderInterface, ControllerProvide
                 'view' => '@user/view.twig',
                 'edit' => '@user/edit.twig',
                 'list' => '@user/list.twig',
-                'list' => '@user/delete.twig',
+                'delete' => '@user/delete.twig',
             ),
 
             // Configure the user mailer for sending password reset and email confirmation messages.
