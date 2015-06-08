@@ -9,6 +9,10 @@
         {
             "name": "Jason Grimes",
             "email": "jason@grimesit.com"
+        },
+        {
+            "name": "Zuying Wo",
+            "email": "zuying.wo@gmail.com"
         }
     ],
     "require": {
@@ -18,7 +22,8 @@
         "doctrine/dbal": "~2.4",
         "symfony/twig-bridge": "~2.3",
         "jasongrimes/paginator": "~1.0",
-        "swiftmailer/swiftmailer": "~5.3"
+        "swiftmailer/swiftmailer": "~5.3",
+        "facebook/php-sdk-v4" : "4.0.*"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.2",

@@ -12,8 +12,11 @@ use Symfony\Component\Security\Core\Authorization\Voter\RoleHierarchyVoter;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\SecurityContextInterface;
 
+use Facebook\FacebookSession;
+
 class UserServiceProvider implements ServiceProviderInterface, ControllerProviderInterface
 {
+    FacebookSession::setDefaultApplication('1593677974224055', '4aa8892f1b99a81ca87bc93099b89fba');
     /**
      * Registers services on the given app.
      *
@@ -39,6 +42,7 @@ class UserServiceProvider implements ServiceProviderInterface, ControllerProvide
                 'view' => '@user/view.twig',
                 'edit' => '@user/edit.twig',
                 'list' => '@user/list.twig',
+                'list' => '@user/delete.twig',
             ),
 
             // Configure the user mailer for sending password reset and email confirmation messages.
@@ -116,6 +120,9 @@ class UserServiceProvider implements ServiceProviderInterface, ControllerProvide
                 }
                 if (isset($app['user.options']['editTemplate']) && !isset($app['user.options']['templates']['edit'])) {
                     $options['templates']['edit'] = $app['user.options']['editTemplate'];
+                }
+                if (isset($app['user.options']['deleteTemplate']) && !isset($app['user.options']['templates']['delete'])) {
+                    $options['templates']['edit'] = $app['user.options']['deleteTemplate'];
                 }
                 if (isset($app['user.options']['listTemplate']) && !isset($app['user.options']['templates']['list'])) {
                     $options['templates']['list'] = $app['user.options']['listTemplate'];
@@ -286,6 +293,14 @@ class UserServiceProvider implements ServiceProviderInterface, ControllerProvide
 
         $controllers->method('GET|POST')->match('/{id}/edit', 'user.controller:editAction')
             ->bind('user.edit')
+            ->before(function(Request $request) use ($app) {
+                if (!$app['security']->isGranted('EDIT_USER_ID', $request->get('id'))) {
+                    throw new AccessDeniedException();
+                }
+            });
+            
+        $controllers->method('GET|POST')->match('/{id}/delete', 'user.controller:editAction')
+            ->bind('user.delete')
             ->before(function(Request $request) use ($app) {
                 if (!$app['security']->isGranted('EDIT_USER_ID', $request->get('id'))) {
                     throw new AccessDeniedException();

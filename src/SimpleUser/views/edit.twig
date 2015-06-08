@@ -88,13 +88,15 @@
                 </div>
             {% endfor %}
         {% endif %}
-
+        
         <div class="form-group">
             <div class="col-sm-8 col-sm-offset-2">
                 <button type="submit" class="btn btn-primary">Save</button>
                 <a style="margin-left: 10px;" href="{{ path('user.view', {'id': user.id}) }}">Back to profile</a>
                 <blockquote class="blockquote-reverse">
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button class="btn btn-danger">
+                        <a style="margin-left: 10px;" href="{{ path('user.delete', {'id': user.id}) }}">Delete</a>
+                    </button>
                 </blockquote>
             </div>
         </div>
