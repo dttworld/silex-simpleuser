@@ -296,7 +296,7 @@ class UserServiceProvider implements ServiceProviderInterface, ControllerProvide
                 }
             });
             
-        $controllers->method('GET|POST')->match('/{id}/delete', 'user.controller:editAction')
+        $controllers->method('GET|POST')->match('/{id}/delete', 'user.controller:deleteAction')
             ->bind('user.delete')
             ->before(function(Request $request) use ($app) {
                 if (!$app['security']->isGranted('EDIT_USER_ID', $request->get('id'))) {

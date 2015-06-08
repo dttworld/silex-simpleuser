@@ -31,6 +31,7 @@ class UserController
         'view' => '@user/view.twig',
         'edit' => '@user/edit.twig',
         'list' => '@user/list.twig',
+        'delete' => '@user/delete.twig',
     );
 
     // Custom fields to support in the editAction().
@@ -409,6 +410,71 @@ class UserController
     {
         // See https://en.gravatar.com/site/implement/images/ for available options.
         return '//www.gravatar.com/avatar/' . md5(strtolower(trim($email))) . '?s=' . $size . '&d=identicon';
+    }
+
+    /**
+     * Edit user action.
+     *
+     * @param Application $app
+     * @param Request $request
+     * @param int $id
+     * @return Response
+     * @throws NotFoundHttpException if no user is found with that ID.
+     */
+    public function deleteAction(Application $app, Request $request, $id)
+    {
+        $errors = array();
+
+        $user = $this->userManager->getUser($id);
+        if (!$user) {
+            throw new NotFoundHttpException('No user was found with that ID.');
+        }
+
+        $customFields = $this->editCustomFields ?: array();
+
+        if ($request->isMethod('POST')) {
+            $user->setName($request->request->get('name'));
+            $user->setEmail($request->request->get('email'));
+            if ($request->request->has('username')) {
+                $user->setUsername($request->request->get('username'));
+            }
+            if ($request->request->get('password')) {
+                if ($request->request->get('password') != $request->request->get('confirm_password')) {
+                    $errors['password'] = 'Passwords don\'t match.';
+                } else if ($error = $this->userManager->validatePasswordStrength($user, $request->request->get('password'))) {
+                    $errors['password'] = $error;
+                } else {
+                    $this->userManager->setUserPassword($user, $request->request->get('password'));
+                }
+            }
+            if ($app['security']->isGranted('ROLE_ADMIN') && $request->request->has('roles')) {
+                $user->setRoles($request->request->get('roles'));
+            }
+
+            foreach (array_keys($customFields) as $customField) {
+                if ($request->request->has($customField)) {
+                    $user->setCustomField($customField, $request->request->get($customField));
+                }
+            }
+
+            $errors += $this->userManager->validate($user);
+
+            if (empty($errors)) {
+                $this->userManager->update($user);
+                $msg = 'Saved account information.' . ($request->request->get('password') ? ' Changed password.' : '');
+                $app['session']->getFlashBag()->set('alert', $msg);
+            }
+        }
+
+        return $app['twig']->render($this->getTemplate('delete'), array(
+            'layout_template' => $this->getTemplate('layout'),
+            'error' => implode("\n", $errors),
+            'user' => $user,
+            'available_roles' => array('ROLE_USER', 'ROLE_ADMIN'),
+            'image_url' => $this->getGravatarUrl($user->getEmail()),
+            'customFields' => $customFields,
+            'isUsernameRequired' => $this->isUsernameRequired,
+        ));
     }
 
     /**
