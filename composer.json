@@ -23,7 +23,8 @@
         "symfony/twig-bridge": "~2.3",
         "jasongrimes/paginator": "~1.0",
         "swiftmailer/swiftmailer": "~5.3",
-        "facebook/php-sdk-v4" : "4.0.*"
+        "facebook/php-sdk-v4" : "4.0.*",
+        "neutron/recaptcha": "0.1.*"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.2",

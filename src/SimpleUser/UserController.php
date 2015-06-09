@@ -10,6 +10,8 @@ use Symfony\Component\Security\Core\Exception\DisabledException;
 use InvalidArgumentException;
 use JasonGrimes\Paginator;
 
+use Neutron\ReCaptcha\ReCaptcha;
+
 /**
  * Controller with actions for handling form-based authentication and user management.
  *
@@ -90,7 +92,19 @@ class UserController
     public function registerAction(Application $app, Request $request)
     {
         if ($request->isMethod('POST')) {
+            
             try {
+                
+                $publicKey="6LcpEQgTAAAAALV34ZXLOrfVqJwnIhdgwbGcIuz0";
+                $privateKey="6LcpEQgTAAAAAL9cIq-4c5jOwP3n6H2I2JVCG6d7";
+                $recaptcha = ReCaptcha::create($publicKey, $privateKey);
+                $response = $recaptcha->bind(Request::createFromGlobals());
+
+                if (!$response->isValid()) {
+                    
+                    throw new InvalidArgumentException($response->getError());
+                }
+                
                 $user = $this->createUserFromRequest($request);
                 if ($error = $this->userManager->validatePasswordStrength($user, $request->request->get('password'))) {
                     throw new InvalidArgumentException($error);
