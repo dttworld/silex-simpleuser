@@ -62,12 +62,9 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <div class="col-sm-8 col-sm-offset-2">
-                    <button type="submit" class="btn btn-primary">Register</button>
-                </div>
-            </div>
-            
+            {% if publicKey == false %}
+            <--
+            {% endif %}
             <div id="recaptcha_widget" style="display:none">
                 <div id="recaptcha_image"></div>
                 <div class="recaptcha_only_if_incorrect_sol" style="color:red">Incorrect please try again</div>
@@ -84,13 +81,21 @@
                 <div><a href="javascript:Recaptcha.showhelp()">Help</a></div>
             </div>
 
-            <script type="text/javascript" src="http://www.google.com/recaptcha/api/challenge?k=6LcpEQgTAAAAALV34ZXLOrfVqJwnIhdgwbGcIuz0"></script>
+            <script type="text/javascript" src="http://www.google.com/recaptcha/api/challenge?k={{ publicKey }}"></script>
             <noscript>
-               <iframe src="http://www.google.com/recaptcha/api/noscript?k=6LcpEQgTAAAAALV34ZXLOrfVqJwnIhdgwbGcIuz0" height="300" width="500" frameborder="0"></iframe><br>
+               <iframe src="http://www.google.com/recaptcha/api/noscript?k={{ publicKey }}" height="300" width="500" frameborder="0"></iframe><br>
                <textarea name="recaptcha_challenge_field" rows="3" cols="40"></textarea>
                <input type="hidden" name="recaptcha_response_field" value="manual_challenge">
             </noscript>
-            <button type="submit">Submit</button>
+            {% if publicKey == false %}
+            -->
+            {% endif %}
+            
+            <div class="form-group">
+                <div class="col-sm-8 col-sm-offset-2">
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </div>
+            </div>
         </form>
 
     {% endif %}

@@ -94,17 +94,17 @@ class UserController
         if ($request->isMethod('POST')) {
             
             try {
-                
-                $publicKey="6LcpEQgTAAAAALV34ZXLOrfVqJwnIhdgwbGcIuz0";
-                $privateKey="6LcpEQgTAAAAAL9cIq-4c5jOwP3n6H2I2JVCG6d7";
-                $recaptcha = ReCaptcha::create($publicKey, $privateKey);
-                $response = $recaptcha->bind(Request::createFromGlobals());
+                if(isset($app['ReCaptcha.privateKey']) &&  isset($app['ReCaptcha.publicKey']))
+                {
+                    $recaptcha = ReCaptcha::create( $app['ReCaptcha.publicKey'], $app['ReCaptcha.privateKey']);
+                    $response = $recaptcha->checkAnswer($_SERVER['REMOTE_ADDR'], $_POST['recaptcha_challenge_field'], $_POST['recaptcha_response_field']);
 
-                if (!$response->isValid()) {
+                    if (!$response->isValid()) {
+                        
+                        throw new InvalidArgumentException($response->getError());
+                    }
                     
-                    throw new InvalidArgumentException($response->getError());
                 }
-                
                 $user = $this->createUserFromRequest($request);
                 if ($error = $this->userManager->validatePasswordStrength($user, $request->request->get('password'))) {
                     throw new InvalidArgumentException($error);
@@ -146,6 +146,7 @@ class UserController
             'email' => $request->request->get('email'),
             'username' => $request->request->get('username'),
             'isUsernameRequired' => $this->isUsernameRequired,
+            'publicKey' => $app['ReCaptcha.publicKey'],
         ));
     }
 
