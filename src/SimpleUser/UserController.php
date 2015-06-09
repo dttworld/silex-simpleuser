@@ -96,14 +96,23 @@ class UserController
             try {
                 if(isset($app['ReCaptcha.privateKey']) &&  isset($app['ReCaptcha.publicKey']))
                 {
-                    $recaptcha = ReCaptcha::create( $app['ReCaptcha.publicKey'], $app['ReCaptcha.privateKey']);
-                    $response = $recaptcha->checkAnswer($_SERVER['REMOTE_ADDR'], $_POST['recaptcha_challenge_field'], $_POST['recaptcha_response_field']);
-
-                    if (!$response->isValid()) {
-                        
-                        throw new InvalidArgumentException($response->getError());
+                    if(!empty($_POST['g-recaptcha-response']))
+                    {
+                        include("getPostResponse.php");
+                        $google_url="https://www.google.com/recaptcha/api/siteverify";
+                        $url=$google_url."?secret=".$app['ReCaptcha.privateKey']."&response=".$_POST['g-recaptcha-response']."&remoteip=".$_SERVER['REMOTE_ADDR'];
+                        $res=getPostResponse($url);
+                        $res= json_decode($res, true);
+                        //reCaptcha success check 
+                        if(!$res['success'])
+                        {
+                            throw new InvalidArgumentException($res['error-codes']);
+                        }
                     }
-                    
+                    else
+                    {
+                         throw new InvalidArgumentException("Please re-enter your reCAPTCHA.");
+                    }
                 }
                 $user = $this->createUserFromRequest($request);
                 if ($error = $this->userManager->validatePasswordStrength($user, $request->request->get('password'))) {
