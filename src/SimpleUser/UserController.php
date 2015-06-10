@@ -457,19 +457,8 @@ class UserController
         $customFields = $this->editCustomFields ?: array();
 
         if ($request->isMethod('POST')) {
-            $user->setName($request->request->get('name'));
-            $user->setEmail($request->request->get('email'));
-            if ($request->request->has('username')) {
-                $user->setUsername($request->request->get('username'));
-            }
-            if ($request->request->get('password')) {
-                if ($request->request->get('password') != $request->request->get('confirm_password')) {
-                    $errors['password'] = 'Passwords don\'t match.';
-                } else if ($error = $this->userManager->validatePasswordStrength($user, $request->request->get('password'))) {
-                    $errors['password'] = $error;
-                } else {
-                    $this->userManager->setUserPassword($user, $request->request->get('password'));
-                }
+            if ($request->request->get('email') !=$user->getEmail()) {
+            		$errors['password'] = 'Input your e-mail address please.';
             }
             if ($app['security']->isGranted('ROLE_ADMIN') && $request->request->has('roles')) {
                 $user->setRoles($request->request->get('roles'));
@@ -484,8 +473,8 @@ class UserController
             $errors += $this->userManager->validate($user);
 
             if (empty($errors)) {
-                $this->userManager->update($user);
-                $msg = 'Saved account information.' . ($request->request->get('password') ? ' Changed password.' : '');
+                $this->userManager->delete($user);
+                $msg = 'Removed account information.';
                 $app['session']->getFlashBag()->set('alert', $msg);
             }
         }
