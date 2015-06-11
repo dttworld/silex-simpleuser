@@ -1,6 +1,7 @@
 /vendor/
 /.idea/
 composer.lock
+.project
 *.swp
 *.swo
 *~

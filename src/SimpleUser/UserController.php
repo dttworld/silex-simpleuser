@@ -148,6 +148,17 @@ class UserController
             }
         }
 
+        if(isset($app['ReCaptcha.privateKey']) &&  isset($app['ReCaptcha.publicKey'])){
+            return $app['twig']->render($this->getTemplate('register'), array(
+                'layout_template' => $this->getTemplate('layout'),
+                'error' => isset($error) ? $error : null,
+                'name' => $request->request->get('name'),
+                'email' => $request->request->get('email'),
+                'username' => $request->request->get('username'),
+                'isUsernameRequired' => $this->isUsernameRequired,
+                'publicKey' => $app['ReCaptcha.publicKey'],
+            ));
+        }
         return $app['twig']->render($this->getTemplate('register'), array(
             'layout_template' => $this->getTemplate('layout'),
             'error' => isset($error) ? $error : null,
@@ -155,7 +166,6 @@ class UserController
             'email' => $request->request->get('email'),
             'username' => $request->request->get('username'),
             'isUsernameRequired' => $this->isUsernameRequired,
-            'publicKey' => $app['ReCaptcha.publicKey'],
         ));
     }
 
@@ -458,7 +468,7 @@ class UserController
 
         if ($request->isMethod('POST')) {
             if ($request->request->get('email') !=$user->getEmail()) {
-            		$errors['password'] = 'Input your e-mail address please.';
+                    $errors['password'] = 'Input your e-mail address please.';
             }
             if ($app['security']->isGranted('ROLE_ADMIN') && $request->request->has('roles')) {
                 $user->setRoles($request->request->get('roles'));
