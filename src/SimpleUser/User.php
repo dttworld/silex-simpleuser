@@ -22,6 +22,7 @@ class User implements AdvancedUserInterface, \Serializable
     protected $isEnabled = true;
     protected $confirmationToken;
     protected $timePasswordResetRequested;
+    protected $digesta1;
 
     protected $customFields = array();
 
@@ -512,4 +513,21 @@ class User implements AdvancedUserInterface, \Serializable
 
         return $timeRequested + $ttl < time();
     }
+    
+    /**
+     * @return string
+     */
+    public function getDigesta1()
+    {
+        return $this->digesta1;
+    }
+
+    /**
+     * @param string $digesta1
+     */
+    public function setDigesta1($digesta1)
+    {
+        $this->digesta1 = $digesta1;
+    }
+    
 }

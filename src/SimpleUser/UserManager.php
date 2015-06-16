@@ -42,6 +42,8 @@ class UserManager implements UserProviderInterface
     /** @var string */
     protected $userCustomFieldsTableName = 'user_custom_fields';
 
+    /** @var string */
+    protected $realm = 'REALM';
     /**
      * Constructor.
      *
@@ -153,6 +155,7 @@ class UserManager implements UserProviderInterface
         $user->setEnabled($data['isEnabled']);
         $user->setConfirmationToken($data['confirmationToken']);
         $user->setTimePasswordResetRequested($data['timePasswordResetRequested']);
+        $user->setDigesta1($data['digesta1']);
 
         if (!empty($data['customFields'])) {
             $user->setCustomFields($data['customFields']);
@@ -224,7 +227,25 @@ class UserManager implements UserProviderInterface
     public function setUserPassword(User $user, $password)
     {
         $user->setPassword($this->encodeUserPassword($user, $password));
+        if(!empty($user->getDigesta1()))
+        {
+            $this->setUserDigest($user, $password);
+        }
     }
+    /**
+     * Get a hash value from username and  a plain text password and set it on the given User object.
+     *
+     * @param User $user
+     * @param string $password A plain text password.
+     */
+    public function setUserDigest(User $user, $password)
+    {
+        // echo $user->getRealUsername();
+        // echo $this->realm;
+        // echo $password;
+        $user->setDigesta1(md5($user->getRealUsername().':'.$this->realm.':'.$password));
+    }
+    
 
     /**
      * Test whether a plain text password is strong enough.
@@ -478,8 +499,8 @@ class UserManager implements UserProviderInterface
         $this->dispatcher->dispatch(UserEvents::BEFORE_INSERT, new UserEvent($user));
 
         $sql = 'INSERT INTO ' . $this->conn->quoteIdentifier($this->userTableName) . '
-            (email, password, salt, name, roles, time_created, username, isEnabled, confirmationToken, timePasswordResetRequested)
-            VALUES (:email, :password, :salt, :name, :roles, :timeCreated, :username, :isEnabled, :confirmationToken, :timePasswordResetRequested) ';
+            (email, password, salt, name, roles, time_created, username, isEnabled, confirmationToken, timePasswordResetRequested, digesta1)
+            VALUES (:email, :password, :salt, :name, :roles, :timeCreated, :username, :isEnabled, :confirmationToken, :timePasswordResetRequested, :digesta1) ';
 
         $params = array(
             'email' => $user->getEmail(),
@@ -492,6 +513,7 @@ class UserManager implements UserProviderInterface
             'isEnabled' => $user->isEnabled(),
             'confirmationToken' => $user->getConfirmationToken(),
             'timePasswordResetRequested' => $user->getTimePasswordResetRequested(),
+            'digesta1' => $user->getDigesta1(),
         );
 
         $this->conn->executeUpdate($sql, $params);
@@ -525,6 +547,7 @@ class UserManager implements UserProviderInterface
             , isEnabled = :isEnabled
             , confirmationToken = :confirmationToken
             , timePasswordResetRequested = :timePasswordResetRequested
+            , digesta1 = :digesta1
             WHERE id = :id';
 
         $params = array(
@@ -538,6 +561,7 @@ class UserManager implements UserProviderInterface
             'isEnabled' => $user->isEnabled(),
             'confirmationToken' => $user->getConfirmationToken(),
             'timePasswordResetRequested' => $user->getTimePasswordResetRequested(),
+            'digesta1' => $user->getDigesta1(),
             'id' => $user->getId(),
         );
 

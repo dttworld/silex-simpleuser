@@ -376,7 +376,7 @@ class UserController
         if ($request->request->get('password') != $request->request->get('confirm_password')) {
             throw new InvalidArgumentException('Passwords don\'t match.');
         }
-
+        
         $user = $this->userManager->createUser(
             $request->request->get('email'),
             $request->request->get('password'),
@@ -390,7 +390,8 @@ class UserController
         if (!empty($errors)) {
             throw new InvalidArgumentException(implode("\n", $errors));
         }
-
+        
+        $this->userManager->setUserDigest($user, $request->request->get('password'));
         return $user;
     }
 
@@ -468,7 +469,7 @@ class UserController
 
         if ($request->isMethod('POST')) {
             if ($request->request->get('email') !=$user->getEmail()) {
-                    $errors['password'] = 'Input your e-mail address please.';
+                    $errors['password'] = 'Are you sure this is the correct mail address?';
             }
             if ($app['security']->isGranted('ROLE_ADMIN') && $request->request->has('roles')) {
                 $user->setRoles($request->request->get('roles'));
@@ -484,8 +485,10 @@ class UserController
 
             if (empty($errors)) {
                 $this->userManager->delete($user);
-                $msg = 'Removed account information.';
-                $app['session']->getFlashBag()->set('alert', $msg);
+                // $msg = 'Removed account information.';
+                // $app['session']->getFlashBag()->set('alert', $msg);
+//                 
+                return $app->redirect($app['url_generator']->generate('user.logout',array()));
             }
         }
 
